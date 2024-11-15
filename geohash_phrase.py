@@ -6,24 +6,23 @@ import hashlib
 NUM_ENCODE_CHARS = 3
 lookup_table_chars = '0123456789bcdefghjkmnpqrstuvwxyz'
 words_needed = len(lookup_table_chars)**NUM_ENCODE_CHARS
+lookup_table_words = None
 
 def init_word_list():
-    word_hasher = hashlib.sha256()
-
-
+    # read file
     with open("wordlist-german.txt", encoding='utf-8') as file:
-        lookup_table_words = []
+        lookup_table_words_temp = []
         for line in file:
-            lookup_table_words.append(file.readline()[:-1])
-    lookup_table_words.sort()
-    lookup_table_words_new = []
+            lookup_table_words_temp.append(file.readline()[:-1])
+    
+    # filter out long words
+    lookup_table_words_new = []    
     last_word = ""
-    for word in lookup_table_words:
+    for word in lookup_table_words_temp:
         if word not in last_word and len(word) < 14:
             lookup_table_words_new.append(word)
         last_word = word
-
-    lookup_table_words = lookup_table_words_new
+    lookup_table_words_temp = lookup_table_words_new
 
     lookup_table_words_final = [None for i in range(words_needed)]
     finished = False
@@ -34,7 +33,7 @@ def init_word_list():
         else:
             raise # we do not want to add new random words
             sub_words = f"{idx}x"
-        for word in lookup_table_words:
+        for word in lookup_table_words_temp:
             full_word = sub_words+word
             word_hash = hashlib.sha256(full_word.encode("utf-8")).hexdigest()
             # use the has as pseudo random value
@@ -48,12 +47,14 @@ def init_word_list():
             if word is None:
                 finished = False
         idx += 1
-    return lookup_table_chars, lookup_table_words_final
-
-lookup_table_chars, lookup_table_words = init_word_list()
-            
+    return lookup_table_words_final
+           
 
 def geo2phrase(lon, lat, precision=4):
+    global lookup_table_words
+    if lookup_table_words is None: # lazy loading
+        lookup_table_words = init_word_list()
+
     geohash_chars = str(geohash.encode(lon, lat, precision))
     wordlist = ''
     while len(geohash_chars) > 0:

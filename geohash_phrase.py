@@ -4,11 +4,12 @@ import random
 import hashlib
 
 NUM_ENCODE_CHARS = 3
+lookup_table_chars = '0123456789bcdefghjkmnpqrstuvwxyz'
+words_needed = len(lookup_table_chars)**NUM_ENCODE_CHARS
+
 def init_word_list():
     word_hasher = hashlib.sha256()
 
-    lookup_table_chars = '0123456789bcdefghjkmnpqrstuvwxyz'
-    words_needed = len(lookup_table_chars)**NUM_ENCODE_CHARS
 
     with open("wordlist-german.txt", encoding='utf-8') as file:
         lookup_table_words = []
@@ -74,7 +75,11 @@ def phrase2geo(words):
     wordlist = words.split(".")
     geohash_chars = ""
     for word in wordlist:
-        word_index = lookup_table_words.index(word)
+        # word_index = lookup_table_words.index(word) #
+        word_hash = hashlib.sha256(word.encode("utf-8")).hexdigest()
+        word_index = int("0x"+str(word_hash[0:2**(NUM_ENCODE_CHARS+1)]), 16) % words_needed
+        
+        
         if word_index < 0:
             raise Exception("invalid word")
         geohash_part = ""    

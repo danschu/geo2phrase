@@ -39,11 +39,11 @@ def main():
     12  3.7cm x 1.9cm 
     """
 
-    print(f"lat: {lat}, lon: {lon}")
+    print(f"Input coords [lat: {lat}, lon: {lon}]")
     phrase = geo2phrase(lat, lon, 12) # Accuracy: 3.7cm x 1.9cm
-    print(f"Phase: {phrase}")
+    print(f"Phrase: {phrase}")
     lat_new, lon_new = phrase2geo(phrase)
-    print(f"reconstructed# lat: {lat_new}, lon: {lon_new}")
+    print(f"Reconstructed coords [lat: {lat_new}, lon: {lon_new}]")
     
 if __name__ == "__main__":
     main()
